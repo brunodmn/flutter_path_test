@@ -1,6 +1,32 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:workmanager/workmanager.dart';
+import 'package:path_provider/path_provider.dart';
+
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    switch (task) {
+      case Workmanager.iOSBackgroundTask:
+        try {
+          Directory tempDir = await getTemporaryDirectory();
+          String tempPath = tempDir.path;
+          print("SUCCESS - path is $tempPath");
+          return Future.value(true);
+        } catch (e) {
+          print("ERROR - $e");
+          return Future.error("ERROR - $e");
+        }
+      default:
+        print("Native called background task: $task");
+        return Future.value(true);
+    }
+  });
+}
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
   runApp(const MyApp());
 }
 
